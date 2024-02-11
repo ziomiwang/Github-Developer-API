@@ -17,9 +17,12 @@ public class GithubClient {
 
     RestClient restClient = RestClient.create();
 
-    public List<GithubRepositoryDTO> fetchUserRepos() {
+    final String uriBase = "https://api.github.com/users/";
+    final String uriEnd = "/repos";
+
+    public List<GithubRepositoryDTO> fetchUserRepos(final String username) {
         List<GithubRepositoryDTO> repositories = restClient.get()
-                .uri("https://api.github.com/users/ziomiwang/repos")
+                .uri(uriBase + username + uriEnd)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
 
@@ -28,7 +31,7 @@ public class GithubClient {
         return repositories;
     }
 
-    public List<BranchDTO> fetchRepoBranches(String branchesUrl) {
+    public List<BranchDTO> fetchRepoBranches(final String branchesUrl) {
         List<BranchDTO> branches = restClient.get()
                 .uri(branchesUrl)
                 .retrieve()

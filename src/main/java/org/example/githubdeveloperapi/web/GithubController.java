@@ -6,6 +6,7 @@ import org.example.githubdeveloperapi.service.GithubService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -16,8 +17,8 @@ public class GithubController {
     private final GithubService githubService;
 
     @GetMapping("/repos")
-    public ResponseEntity<List<GithubRepository>> getUserRepos() {
-        List<GithubRepository> githubRepositories = githubService.fetchUserRepos();
+    public ResponseEntity<List<GithubRepository>> getUserRepos(@RequestParam("username") String username) {
+        List<GithubRepository> githubRepositories = githubService.fetchUserRepos(username);
 
         return ResponseEntity.ok(githubRepositories);
     }
