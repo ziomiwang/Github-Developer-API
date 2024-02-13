@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableWireMock({
-        @ConfigureWireMock(name = "user-service", property = "user-client.url", stubLocation = "user-client")
+        @ConfigureWireMock(name = "github-client", property = "github-client.url")
 })
 @ExtendWith(SpringExtension.class)
 public class GithubFetchIntegrationTest {
@@ -37,11 +37,11 @@ public class GithubFetchIntegrationTest {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
-    @InjectWireMock("user-service")
+    @InjectWireMock("github-client")
     private WireMockServer wiremock;
 
-    @Value("${user-client.url}")
-    private String wiremockUrl; // injects the base URL of the WireMockServer instance
+    @Value("${github-client.url}")
+    private String wiremockUrl;
 
     @Test
     public void integrationTest() throws Exception {
@@ -70,7 +70,7 @@ public class GithubFetchIntegrationTest {
         List<GithubRepository> body = response.getBody();
 
         assertThat(body).extracting(GithubRepository::getOwnerLogin)
-                        .containsOnly("ziomiwang");
+                .containsOnly("ziomiwang");
 
         assertThat(body).extracting(GithubRepository::getBranches).extracting(data -> {
                     assertThat(data).hasSize(2);

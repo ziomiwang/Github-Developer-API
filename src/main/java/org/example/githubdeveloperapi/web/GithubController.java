@@ -18,9 +18,7 @@ public class GithubController {
 
     @GetMapping("/repos")
     public ResponseEntity<List<GithubRepository>> getUserRepos(@RequestParam("username") String username) {
-        List<GithubRepository> githubRepositories = githubService.fetchUserRepos(username);
-
-        return ResponseEntity.ok(githubRepositories);
+        return ResponseEntity.ok(githubService.fetchUserRepos(username));
     }
 
 }
