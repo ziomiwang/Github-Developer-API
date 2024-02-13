@@ -2,7 +2,7 @@ package org.example.githubdeveloperapi.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.githubdeveloperapi.client.GithubClient;
-import org.example.githubdeveloperapi.client.exception.GithubException;
+import org.example.githubdeveloperapi.exception.GithubException;
 import org.example.githubdeveloperapi.client.mapper.GithubMapper;
 import org.example.githubdeveloperapi.client.model.branch.BranchDTO;
 import org.example.githubdeveloperapi.client.model.repository.GithubRepositoryDTO;
@@ -21,7 +21,7 @@ public class GithubService {
 
     public List<GithubRepository> fetchUserRepos(final String username) {
 
-        List<GithubRepositoryDTO> githubRepositoryDTOS = Collections.emptyList();
+        List<GithubRepositoryDTO> githubRepositoryDTOS;
 
         try {
             githubRepositoryDTOS = githubClient.fetchUserRepos(username);

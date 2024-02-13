@@ -1,0 +1,18 @@
+[
+  {
+    "name": "mocked_branch",
+    "commit": {
+      "sha": "2b1574f649c74fe8453d95eff03343a4694fd7ab",
+      "url": "https://api.github.com/repos/ziomiwang/places-and-events/commits/2b1574f649c74fe8453d95eff03343a4694fd7ab"
+    },
+    "protected": false
+  },
+  {
+    "name": "second_mocked_branch",
+    "commit": {
+      "sha": "d9baac2c7fb1e44cf34d7f9f66226d3950785032",
+      "url": "https://api.github.com/repos/ziomiwang/places-and-events/commits/d9baac2c7fb1e44cf34d7f9f66226d3950785032"
+    },
+    "protected": false
+  }
+]

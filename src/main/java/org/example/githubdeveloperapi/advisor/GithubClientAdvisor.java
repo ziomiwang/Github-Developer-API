@@ -1,6 +1,6 @@
-package org.example.githubdeveloperapi.client.advisor;
+package org.example.githubdeveloperapi.advisor;
 
-import org.example.githubdeveloperapi.client.exception.GithubException;
+import org.example.githubdeveloperapi.exception.GithubException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,4 +1,4 @@
-package org.example.githubdeveloperapi.client.exception;
+package org.example.githubdeveloperapi.exception;
 
 import lombok.Getter;
 
