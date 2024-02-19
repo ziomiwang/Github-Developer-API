@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -48,13 +46,11 @@ public class GithubFetchIntegrationTest {
         String responseMockBody = getDataFromFile("github-response.json").replaceAll("wiremock-url", wiremockUrl);
         String branchesResponseMockBody = getDataFromFile("github-branches-response.json");
 
-
         wiremock.stubFor(get("/users/" + USERNAME + "/repos")
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(responseMockBody)));
-
 
         wiremock.stubFor(get(urlPathMatching("^/repos/[^/]+/([^/]+)/branches"))
                 .willReturn(aResponse()
@@ -62,8 +58,11 @@ public class GithubFetchIntegrationTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(branchesResponseMockBody)));
 
-        ResponseEntity<List<GithubRepository>> response = testRestTemplate.exchange("/repos?username=" + USERNAME, HttpMethod.GET, null, new ParameterizedTypeReference<List<GithubRepository>>() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        ResponseEntity<List<GithubRepository>> response = testRestTemplate.exchange("/repos?username=" + USERNAME, HttpMethod.GET, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
         });
+
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 

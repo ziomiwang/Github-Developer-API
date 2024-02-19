@@ -1,22 +1,18 @@
 package org.example.githubdeveloperapi.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.githubdeveloperapi.client.exception.GithubException;
 import org.example.githubdeveloperapi.client.model.branch.BranchDTO;
 import org.example.githubdeveloperapi.client.model.repository.GithubRepositoryDTO;
 import org.example.githubdeveloperapi.exception.GithubWebException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,7 +28,7 @@ public class GithubClientHandler {
         List<GithubRepositoryDTO> repositories;
         try {
             repositories = restClient.get()
-                    .uri(baseUrl + "/userz", username)
+                    .uri(baseUrl + "/users/{username}/repos", username)
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {
                     });
@@ -40,8 +36,10 @@ public class GithubClientHandler {
             log.info("response, {}", repositories);
 
         } catch (HttpClientErrorException.NotFound ex) {
-            throw new GithubWebException("Account not found for given username", 404);
+            log.warn("Error while fetching repositories for given github name, {}", username);
+            throw new GithubWebException("Account not found for given username", 404, HttpStatus.NOT_FOUND);
         } catch (HttpClientErrorException generalEx) {
+            log.error("Error while executing client call", generalEx);
             throw new GithubWebException();
         }
 
@@ -59,8 +57,10 @@ public class GithubClientHandler {
 
             log.info("branches, {}", branches);
         } catch (HttpClientErrorException.NotFound ex) {
+            log.warn("Error while fetching branches for given github name");
             throw new GithubWebException("Account not found for given username", 404);
         } catch (HttpClientErrorException generalEx) {
+            log.error("Error while executing client call", generalEx);
             throw new GithubWebException();
         }
 
