@@ -1,14 +1,7 @@
 package org.example.githubdeveloperapi.model;
 
-import lombok.*;
+import lombok.Builder;
 
-@Getter
-@Setter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class GithubBranch {
-
-    private String branchName;
-    private String sha;
+public record GithubBranch (String branchName, String sha) {
 }

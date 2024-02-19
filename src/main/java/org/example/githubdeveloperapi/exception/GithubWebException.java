@@ -17,6 +17,11 @@ public class GithubWebException extends RuntimeException {
         this.status = status;
     }
 
+    public GithubWebException(String message, int status) {
+        super();
+        this.status = status;
+        this.message = message;
+    }
     public GithubWebException(GithubException githubException, int status) {
         super();
         this.status = status;

@@ -21,36 +21,35 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GithubClient {
+public class GithubClientHandler {
 
-    RestClient restClient = RestClient.create();
+    private final RestClient restClient;
 
     @Value("${github-client.url}")
     private String baseUrl;
 
     public List<GithubRepositoryDTO> fetchUserRepos(final String username) {
-        String url = baseUrl + "/users/{username}/repos";
-        log.info("url {}", url);
-
-        List<GithubRepositoryDTO> repositories = new ArrayList<>();
+        List<GithubRepositoryDTO> repositories;
         try {
             repositories = restClient.get()
-                    .uri(baseUrl + "/users/{username}/repos", username)
+                    .uri(baseUrl + "/userz", username)
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {
                     });
 
             log.info("response, {}", repositories);
 
-        } catch (HttpClientErrorException ex) {
-            exceptionHandling(ex);
+        } catch (HttpClientErrorException.NotFound ex) {
+            throw new GithubWebException("Account not found for given username", 404);
+        } catch (HttpClientErrorException generalEx) {
+            throw new GithubWebException();
         }
 
         return repositories;
     }
 
     public List<BranchDTO> fetchRepoBranches(final String branchesUrl) {
-        List<BranchDTO> branches = new ArrayList<>();
+        List<BranchDTO> branches;
         try {
             branches = restClient.get()
                     .uri(branchesUrl)
@@ -59,29 +58,12 @@ public class GithubClient {
                     });
 
             log.info("branches, {}", branches);
-        } catch (HttpClientErrorException ex) {
-            exceptionHandling(ex);
+        } catch (HttpClientErrorException.NotFound ex) {
+            throw new GithubWebException("Account not found for given username", 404);
+        } catch (HttpClientErrorException generalEx) {
+            throw new GithubWebException();
         }
 
         return branches;
-    }
-
-    private void exceptionHandling(HttpClientErrorException ex) {
-        Optional<GithubException> githubException = mapGithubException(ex);
-        if (githubException.isEmpty()) {
-            log.error("Error while executing client call", ex);
-            throw new GithubWebException(ex.getStatusCode().value());
-        }
-        log.warn("Error while executing client call, parsed exception: {}", githubException);
-        throw new GithubWebException(githubException.get(), ex.getStatusCode().value());
-    }
-
-    private Optional<GithubException> mapGithubException(HttpClientErrorException ex) {
-        try {
-            return Optional.of(new ObjectMapper().readValue(ex.getResponseBodyAsByteArray(), GithubException.class));
-        } catch (IOException e) {
-            log.warn("Cannot serialize github exception", e);
-            return Optional.empty();
-        }
     }
 }

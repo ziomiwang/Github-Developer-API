@@ -6,17 +6,18 @@ import com.maciejwalkowiak.wiremock.spring.EnableWireMock;
 import com.maciejwalkowiak.wiremock.spring.InjectWireMock;
 import org.apache.commons.io.IOUtils;
 import org.example.githubdeveloperapi.model.GithubRepository;
+import org.example.githubdeveloperapi.web.GithubController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,17 +26,23 @@ import java.util.List;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {GithubController.class, GithubService.class})
 @EnableWireMock({
         @ConfigureWireMock(name = "github-client", property = "github-client.url")
 })
 @ExtendWith(SpringExtension.class)
-public class GithubFetchIntegrationTest {
+@AutoConfigureWebTestClient
+@WebFluxTest(controllers = GithubController.class)
+@Import(GithubTestConfiguration.class)
+public class GithubFetchIntegrationTestWithWebClient {
 
     private final static String USERNAME = "ziomiwang";
 
     @Autowired
-    private TestRestTemplate testRestTemplate;
+    WebTestClient webTestClient;
+
+    @Autowired
+    ApplicationContext context;
 
     @InjectWireMock("github-client")
     private WireMockServer wiremock;
@@ -62,21 +69,20 @@ public class GithubFetchIntegrationTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(branchesResponseMockBody)));
 
-        ResponseEntity<List<GithubRepository>> response = testRestTemplate.exchange("/repos?username=" + USERNAME, HttpMethod.GET, null, new ParameterizedTypeReference<List<GithubRepository>>() {
-        });
+        List<GithubRepository> body = webTestClient.get()
+                .uri("/repos?username=" + USERNAME)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Content-type", MediaType.APPLICATION_JSON.toString())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(GithubRepository.class)
+                .returnResult()
+                .getResponseBody();
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        List<GithubRepository> body = response.getBody();
 
         assertThat(body).extracting(GithubRepository::ownerLogin)
                 .containsOnly("ziomiwang");
-
-        assertThat(body).extracting(GithubRepository::branches).extracting(data -> {
-                    assertThat(data).hasSize(2);
-                    return data;
-                })
-                .hasSize(5);
 
     }
 

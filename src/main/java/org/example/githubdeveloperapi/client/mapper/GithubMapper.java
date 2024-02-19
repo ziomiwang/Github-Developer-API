@@ -4,33 +4,35 @@ import org.example.githubdeveloperapi.client.model.branch.BranchDTO;
 import org.example.githubdeveloperapi.client.model.repository.GithubRepositoryDTO;
 import org.example.githubdeveloperapi.model.GithubBranch;
 import org.example.githubdeveloperapi.model.GithubRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class GithubMapper {
 
-    public static GithubRepository map(GithubRepositoryDTO repositoryDTO, List<BranchDTO> branchesDTO) {
+    public GithubRepository map(GithubRepositoryDTO repositoryDTO, List<BranchDTO> branchesDTO) {
         return GithubRepository.builder()
-                .repositoryName(repositoryDTO.getName())
+                .repositoryName(repositoryDTO.name())
                 .ownerLogin(repositoryDTO
-                        .getOwner()
-                        .getLogin())
+                        .owner()
+                        .login())
                 .branches(map(branchesDTO))
                 .build();
     }
 
-    private static List<GithubBranch> map(List<BranchDTO> branchesDTO) {
+    private List<GithubBranch> map(List<BranchDTO> branchesDTO) {
         return branchesDTO.stream()
-                .map(GithubMapper::map)
+                .map(this::map)
                 .toList();
     }
 
-    private static GithubBranch map(BranchDTO branchDTO) {
+    private GithubBranch map(BranchDTO branchDTO) {
         return GithubBranch.builder()
-                .branchName(branchDTO.getName())
+                .branchName(branchDTO.name())
                 .sha(branchDTO
-                        .getCommit()
-                        .getSha())
+                        .commit()
+                        .sha())
                 .build();
     }
 }
